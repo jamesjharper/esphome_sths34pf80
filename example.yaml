@@ -1,0 +1,54 @@
+# STHS34PF80 Thermal Infrared Human Presence Sensor - Simple Example
+# This is a minimal configuration for basic presence and motion detection
+# 
+# This example includes:
+# - Basic STHS34PF80 sensor configuration with default settings
+# - Binary sensors for presence and motion detection
+# - Optional interrupt pin for better responsiveness
+#
+# The sensor will work with default settings for most applications.
+# For advanced configuration options, see sths34pf80_example.yaml
+
+esphome:
+  name: sths34pf80-simple
+  platform: ESP32
+  board: esp32dev
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jamesjharper/esphome_sths34pf80
+
+
+# I2C bus configuration
+i2c:
+  id: bus_a
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+sths34pf80:
+  id: sths34pf80_component
+  i2c_id: bus_a
+  address: 0x5A 
+  
+  # Optional: Add interrupt pin for better responsiveness and lower power consumption
+  # If omitted, the sensor will be polled at the ODR rate (default 15Hz)
+  interrupt_pin: GPIO4
+  
+# Binary sensors for detection events
+# These provide simple on/off states for presence and motion detection
+binary_sensor:
+  - platform: sths34pf80
+    
+    # Presence detection - triggers when stationary objects are detected
+    # Best for detecting people sitting still or objects warmer/cooler than ambient
+    presence:
+      name: "Presence Detected"
+      device_class: occupancy
+    
+    # Motion detection - triggers when moving objects are detected  
+    # Best for detecting people walking, waving hands, or other movement
+    motion:
+      name: "Motion Detected"
+      device_class: motion

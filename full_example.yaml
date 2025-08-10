@@ -1,0 +1,263 @@
+# STHS34PF80 Thermal Infrared Human Presence Sensor - Complete Example
+# This example demonstrates ALL available configuration options for the STHS34PF80 component
+# 
+# IMPORTANT: Most settings shown here are OPTIONAL and have sensible defaults
+# For typical use cases, see the simplified example (example.yaml)
+#
+esphome:
+  name: sths34pf80-example
+  platform: ESP32
+  board: esp32dev
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jamesjharper/esphome_sths34pf80
+
+i2c:
+  id: bus_a
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+
+sths34pf80:
+  id: sths34pf80_component
+  i2c_id: bus_a
+  # Device does not support changing address
+  address: 0x5A
+
+  # Optional: Add interrupt pin for better responsiveness and lower power consumption
+  # If omitted, the sensor will be polled at the ODR rate (default 15Hz)
+  interrupt_pin: GPIO4
+  
+  # Device Configuration - Averaging
+  # Controls noise reduction vs response time trade-off
+  # More averaging = less noise but slower response to changes
+  avg_t_object_number: "32"      # Options: 2, 8, 32, 128, 256, 512, 1024, 2048
+                                 # Number of samples to average for object temperature
+  avg_t_ambient_number: "8"      # Options: 1, 2, 4, 8
+                                 # Number of samples to average for ambient temperature
+  
+  # Automatic recalibration interval (default: 10min)
+  # Resets algorithms when no detection occurs for specified time
+  # Improves presence detection accuracy, especially when using absolute mode
+  # Required when objects may be present during device initialization
+  recalibration_interval: "10min"
+  
+  # Device Configuration - Basic Settings
+  gain_mode: "DEFAULT"           # Options: WIDE, DEFAULT
+                                 # - DEFAULT: 2000 LSB/°C
+                                 # - WIDE: 250 LSB/°C (8x range), Note! will disable embedded detection algorithms disabled
+  tmos_odr: "15HZ"               # Options: 0.25HZ, 0.5HZ, 1HZ, 2HZ, 4HZ, 8HZ, 15HZ, 30HZ
+                                 # Controls measurement frequency and power consumption
+                                 # Higher rates = more power but faster response
+  
+  # Presence Detection Configuration (Configure by LSB or degrees)
+  # Determines sensitivity - lower values = more sensitive detection
+  presence_threshold_degrees: 2.0     # Alternative: presence_threshold_lsb: 4032
+                                      # Temperature difference required to trigger presence detection
+  presence_hysteresis_degrees: 0.5    # Alternative: presence_hysteresis_lsb: 1008
+                                      # Temperature reduction required to clear detection
+                                      # Prevents oscillation around threshold boundaries
+  lpf_presence_bandwidth: "DIV_50"    # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+                                      # Low-pass filter bandwidth as ratio to ODR
+                                      # Controls sensitivity to changes in sensor output
+  presence_abs_value: "ENABLE_DELAYED" # Options: DISABLED, ENABLED, ENABLE_DELAYED
+                                      # Enable for detecting objects colder or hotter than ambient
+                                      # DISABLED: Absolute value disabled
+                                      # ENABLED: Absolute value enabled immediately
+                                      # ENABLE_DELAYED: Enable after first recalibration (safer)
+  
+  # Motion Detection Configuration (Configure by LSB or degrees)
+  # Determines motion sensitivity - lower values = more sensitive detection
+  motion_threshold_degrees: 1.5       # Alternative: motion_threshold_lsb: 200
+                                      # Temperature difference required to trigger motion detection
+  motion_hysteresis_degrees: 0.3      # Alternative: motion_hysteresis_lsb: 50
+                                      # Temperature reduction required to clear motion detection
+  lpf_motion_bandwidth: "DIV_100"     # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+                                      # Low-pass filter for motion detection algorithm
+
+                                      
+  lpf_presence_motion_bandwidth: "DIV_100"  # Combined presence/motion filter bandwidth
+                                      # Used for presence algorithm motion component
+  
+  # Ambient Shock Detection Configuration (Configure by LSB or degrees)
+  # Detects sudden ambient temperature changes (e.g., Equipment failure, fire, etc )
+  t_ambient_shock_threshold_degrees: 3.0   # Alternative: t_ambient_shock_threshold_lsb: 300
+                                          # Temperature change required to trigger shock detection
+  t_ambient_shock_hysteresis_degrees: 0.5  # Alternative: t_ambient_shock_hysteresis_lsb: 50
+                                          # Temperature reduction required to clear shock detection
+  lpf_ambient_temp_bandwidth: "DIV_50"     # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+                                          # Low-pass filter for ambient temperature shock detection
+  
+  # Interrupt Configuration (when using interrupt_pin)
+  # Configure what signals are routed to the INT pin
+  # Note: These values are managed internally, changes may result in unexpected behavior
+  tmos_route_interrupt: "DRDY"        # Options: HIZ (disabled), DRDY (data ready), OR (algorithm detect)
+                                      # Controls what triggers the interrupt pin
+  tmos_interrupt_or: "ALL"            # Options: NONE, TSHOCK, MOTION, TSHOCK_MOTION, PRESENCE, TSHOCK_PRESENCE, MOTION_PRESENCE, ALL
+                                      # Which detection algorithms trigger interrupts
+  data_ready_mode: "LATCHED"          # Options: PULSED, LATCHED
+                                      # How the data ready signal behaves
+  interrupt_pulsed: false             # Enable interrupt pulse mode
+  
+
+binary_sensor:
+  - platform: sths34pf80
+    sths34pf80_id: sths34pf80_component
+    
+    presence:
+      name: "Presence Detected"
+    
+    motion:
+      name: "Motion Detected"           
+      
+    thermal_shock:
+      name: "Thermal Shock Detected" 
+
+sensor:
+  - platform: sths34pf80
+    
+    # Absolute Temperature Sensors
+    # These provide actual temperature readings in degrees Celsius
+    ambient_temperature:
+      name: "Ambient Temperature"          # Room/ambient temperature reading
+    
+    object_temperature:
+      name: "Object Temperature"           # Temperature of objects in sensor's field of view
+
+    object_temperature_delta:
+      name: "Object Temperature Delta"     # Difference between object and ambient temperature
+    
+    # Algorithm Temperature Delta Sensors (in degrees Celsius)
+    # These are outputs from the embedded detection algorithms
+    # Useful for diagnostics and tuning detection parameters
+    presence_temperature_delta:
+      name: "Presence Temperature Delta"   # Temperature change calculated by presence algorithm
+    
+    motion_temperature_delta:
+      name: "Motion Temperature Delta"     # Temperature change calculated by motion algorithm
+    
+    thermal_shock_temperature_delta:
+      name: "Thermal Shock Temperature Delta"  # Temperature change from ambient shock algorithm
+    
+    # Raw LSB Sensors (for advanced users and debugging)
+    # These provide unprocessed LSB values from embedded algorithms
+    # Mainly useful for parameter tuning and troubleshooting
+    presence_raw_lsb:
+      name: "Presence Raw LSB"             # Raw LSB output from presence algorithm
+    
+    motion_raw_lsb:
+      name: "Motion Raw LSB"               # Raw LSB output from motion algorithm
+    
+    thermal_shock_raw_lsb:
+      name: "Thermal Shock Raw LSB"        # Raw LSB output from ambient shock algorithm
+
+switch:
+  - platform: sths34pf80
+    
+    # Calibration Control Switch
+    # Controls whether calibration values are updated 
+    enable_calibration:
+      name: "Enable Calibration" 
+      restore_value: false
+      initial_value: false 
+
+select:
+  - platform: sths34pf80
+
+    # Averaging Configuration Selects
+    # Control noise reduction vs response time trade-off at runtime
+    average_object_temperature_number:
+      name: "Object Temperature Averaging"  # Options: 2, 8, 32, 128, 256, 512, 1024, 2048
+      initial_value: "128"                  # Higher values = less noise, slower response
+    
+    average_ambient_temperature_number:
+      name: "Ambient Temperature Averaging" # Options: 1, 2, 4, 8
+      initial_value: "8"                    # Higher values = less noise, slower response
+    
+    # Basic Sensor Configuration Selects
+    gain_mode:
+      name: "Gain Mode"                     # Options: DEFAULT, WIDE
+      initial_value: "DEFAULT"              # DEFAULT: algorithms enabled, WIDE: 8x range, no algorithms
+    
+    sample_rate:
+      name: "Sample Rate"                   # Options: 0.25HZ, 0.5HZ, 1HZ, 2HZ, 4HZ, 8HZ, 15HZ, 30HZ
+      initial_value: "15HZ"                  # Higher rates = more power, faster response
+    
+    # Low-Pass Filter Configuration Selects
+    # Control sensitivity of detection algorithms to sensor output changes
+    low_pass_filter_presence_bandwidth:
+      name: "Presence Filter Bandwidth"    # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+      initial_value: "DIV_200"              # Filter bandwidth as fraction of ODR
+    
+    low_pass_filter_motion_bandwidth:
+      name: "Motion Filter Bandwidth"      # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+      initial_value: "DIV_200"              # Filter bandwidth as fraction of ODR
+    
+    low_pass_filter_ambient_temperature_bandwidth:
+      name: "Ambient Temperature Filter Bandwidth"  # Options: DIV_9, DIV_20, DIV_50, DIV_100, DIV_200, DIV_400, DIV_800
+      initial_value: "DIV_50"                       # Filter bandwidth as fraction of ODR
+
+number:
+  - platform: sths34pf80
+    
+    # Presence Detection Thresholds (choose LSB or degrees, not both)
+    # Lower values = more sensitive detection
+    presence_threshold_lsb:
+      name: "Presence Threshold (LSB)"      # Raw LSB threshold value (0-65535)
+                                           # Alternative to presence_threshold_degree
+    
+    presence_threshold_degree:
+      name: "Presence Threshold (°C)"      # Temperature difference threshold in Celsius
+                                           # Alternative to presence_threshold_lsb
+    
+    # Motion Detection Thresholds (choose LSB or degrees, not both)
+    # Lower values = more sensitive detection
+    motion_threshold_lsb:
+      name: "Motion Threshold (LSB)"       # Raw LSB threshold value (0-255)
+                                           # Alternative to motion_threshold_degree
+    
+    motion_threshold_degree:
+      name: "Motion Threshold (°C)"        # Temperature difference threshold in Celsius
+                                           # Alternative to motion_threshold_lsb
+    
+    # Ambient Shock Detection Thresholds (choose LSB or degrees, not both)
+    # Controls sensitivity to ambient temperature changes
+    ambient_shock_threshold_lsb:
+      name: "Ambient Shock Threshold (LSB)"  # Raw LSB threshold value (0-65535)
+                                             # Alternative to ambient_shock_threshold_degree
+    
+    ambient_shock_threshold_degree:
+      name: "Ambient Shock Threshold (°C)"   # Temperature change threshold in Celsius
+                                             # Alternative to ambient_shock_threshold_lsb
+    
+    # Presence Detection Hysteresis (choose LSB or degrees, not both)
+    # Temperature reduction required to clear detection (prevents oscillation)
+    presence_hysteresis_lsb:
+      name: "Presence Hysteresis (LSB)"    # Raw LSB hysteresis value (0-255)
+                                           # Alternative to presence_hysteresis_degree
+    
+    presence_hysteresis_degree:
+      name: "Presence Hysteresis (°C)"     # Temperature reduction in Celsius
+                                           # Alternative to presence_hysteresis_lsb
+    
+    # Motion Detection Hysteresis (choose LSB or degrees, not both)
+    # Temperature reduction required to clear motion detection
+    motion_hysteresis_lsb:
+      name: "Motion Hysteresis (LSB)"      # Raw LSB hysteresis value (0-255)
+                                           # Alternative to motion_hysteresis_degree
+    
+    motion_hysteresis_degree:
+      name: "Motion Hysteresis (°C)"       # Temperature reduction in Celsius
+                                           # Alternative to motion_hysteresis_lsb
+    
+    # Ambient Shock Detection Hysteresis (choose LSB or degrees, not both)
+    # Temperature reduction required to clear shock detection
+    ambient_shock_hysteresis_lsb:
+      name: "Ambient Shock Hysteresis (LSB)"  # Raw LSB hysteresis value (0-255)
+                                              # Alternative to ambient_shock_hysteresis_degree
+    
+    ambient_shock_hysteresis_degree:
+      name: "Ambient Shock Hysteresis (°C)"   # Temperature reduction in Celsius
+                                              # Alternative to ambient_shock_hysteresis_lsb
