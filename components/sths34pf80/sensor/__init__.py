@@ -70,6 +70,7 @@ CONFIG_SCHEMA = cv.Schema({
         unit_of_measurement=UNIT_CELSIUS,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
+        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         accuracy_decimals=2,
         icon=ICON_THERMOMETER,
     ).extend(cv.polling_component_schema("1s")),
@@ -145,6 +146,11 @@ async def to_code(config):
         await cg.register_parented(sensor_var, parent_var)
 
     # Temperature delta sensors
+    if sensor_config := config.get(CONF_OBJECT_TEMPERATURE_DELTA):
+        sensor_var = await sensor.new_sensor(sensor_config)
+        await cg.register_component(sensor_var, sensor_config)
+        await cg.register_parented(sensor_var, parent_var)
+
     if sensor_config := config.get(CONF_PRESENCE_TEMPERATURE_DELTA):
         sensor_var = await sensor.new_sensor(sensor_config)
         await cg.register_component(sensor_var, sensor_config)

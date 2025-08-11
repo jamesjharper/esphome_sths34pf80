@@ -46,8 +46,24 @@ The following settings have sensible defaults which should be adequate for most 
 
 #### Sensor Settings
 - **avg_t_object_number** (*Optional*, enum): Number of samples to average for object temperature. More averaging reduces noise but slows response. One of `2`, `8`, `32`, `128`, `256`, `512`, `1024`, `2048`. Defaults to `128`.
+  
+  **ODR Compatibility:** The maximum `tmos_odr` you can select depends on the chosen averaging factor. Exceeding the limit will cause an error to be logged and the configuration will be rejected.
+  
+  | avg_t_object_number | Max compatible `tmos_odr` |
+  |---------------------|---------------------------|
+  | 2 / 8 / 32          | 30 Hz (or lower)          |
+  | 128                 | 8 Hz (or lower)           |
+  | 256                 | 4 Hz (or lower)           |
+  | 512                 | 2 Hz (or lower)           |
+  | 1024                | 1 Hz (or lower)           |
+  | 2048                | 0.5 Hz (or lower)         |
+  
+  When `avg_t_object_number` is not explicitly specified, the component will automatically choose the highest legal averaging value for the requested `tmos_odr`.
 - **avg_t_ambient_number** (*Optional*, enum): Number of samples to average for ambient temperature. One of `1`, `2`, `4`, `8`. Defaults to `8`.
 - **tmos_odr** (*Optional*, enum): Output data rate controlling measurement frequency. Higher rates consume more power but provide faster response. One of `0.25HZ`, `0.5HZ`, `1HZ`, `2HZ`, `4HZ`, `8HZ`, `15HZ`, `30HZ`. Defaults to `15HZ`.
+
+  **Averaging Interaction:** The selected `tmos_odr` restricts the maximum allowed `avg_t_object_number` (see table above). If `avg_t_object_number` is *not* explicitly set the component will automatically choose the highest value that is still compatible with the requested `tmos_odr`. Conversely, if you manually specify an `avg_t_object_number` that is incompatible with your chosen `tmos_odr`, the component will silently lower the `tmos_odr` to the highest rate that remains within specification and a warning will be logged at startup.
+  
 - **gain_mode** (*Optional*, enum): Sensor gain mode. `DEFAULT` enables embedded algorithms with 2016 LSB/°C sensitivity. `WIDE` provides 8x measurement range (250 LSB/°C) but disables detection algorithms. Defaults to `DEFAULT`.
 
 #### Detection Configuration

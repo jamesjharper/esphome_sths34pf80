@@ -33,7 +33,7 @@ DEFINE_STHS34PF80_SENSOR(AmbientTemperatureSensor, get_ambient_temperature, Sths
 DEFINE_STHS34PF80_SENSOR(ObjectTemperatureSensor, get_object_temperature, Sths34pf80Component, false)
 
 // Temperature delta sensors (in degrees Celsius)
-DEFINE_STHS34PF80_SENSOR(ObjectTemperatureDeltaSensor, get_object_temperature_delta, Sths34pf80Component, false)
+DEFINE_STHS34PF80_SENSOR(ObjectTemperatureDeltaSensor, get_object_temperature_delta, Sths34pf80Component, true)
 DEFINE_STHS34PF80_SENSOR(PresenceTemperatureDeltaSensor, get_presence_temperature_delta, Sths34pf80Component, true)
 DEFINE_STHS34PF80_SENSOR(MotionTemperatureDeltaSensor, get_motion_temperature_delta, Sths34pf80Component, true)
 DEFINE_STHS34PF80_SENSOR(ThermalShockTemperatureDeltaSensor, get_ambient_shock_temperature_delta, Sths34pf80Component,

@@ -60,7 +60,7 @@ CONF_INTERRUPT_MODE = 'interrupt_mode'
 CONF_T_OBJECT_ALGO_COMPENSATION = 't_object_algo_compensation'
 
 # Enum definitions
-AvgTObjectNumber = sths34pf80_ns.enum('sths34pf80_avg_tobject_num_t')
+AvgTObjectNumber = cg.global_ns.enum('sths34pf80_avg_tobject_num_t')
 AVG_T_OBJECT_NUMBERS = {
     '2': AvgTObjectNumber.STHS34PF80_AVG_TMOS_2,
     '8': AvgTObjectNumber.STHS34PF80_AVG_TMOS_8,
@@ -72,7 +72,7 @@ AVG_T_OBJECT_NUMBERS = {
     '2048': AvgTObjectNumber.STHS34PF80_AVG_TMOS_2048,
 }
 
-AvgTAmbientNumber = sths34pf80_ns.enum('sths34pf80_avg_tambient_num_t')
+AvgTAmbientNumber = cg.global_ns.enum('sths34pf80_avg_tambient_num_t')
 AVG_T_AMBIENT_NUMBERS = {
     '8': AvgTAmbientNumber.STHS34PF80_AVG_T_8,
     '4': AvgTAmbientNumber.STHS34PF80_AVG_T_4,
@@ -80,13 +80,13 @@ AVG_T_AMBIENT_NUMBERS = {
     '1': AvgTAmbientNumber.STHS34PF80_AVG_T_1,
 }
 
-GainMode = sths34pf80_ns.enum('sths34pf80_gain_mode_t')
+GainMode = cg.global_ns.enum('sths34pf80_gain_mode_t')
 GAIN_MODES = {
     'WIDE': GainMode.STHS34PF80_GAIN_WIDE_MODE,
     'DEFAULT': GainMode.STHS34PF80_GAIN_DEFAULT_MODE,
 }
 
-TmosOdr = sths34pf80_ns.enum('sths34pf80_tmos_odr_t')
+TmosOdr = cg.global_ns.enum('sths34pf80_tmos_odr_t')
 TMOS_ODRS = {
     'OFF': TmosOdr.STHS34PF80_TMOS_ODR_OFF,
     '0.25HZ': TmosOdr.STHS34PF80_TMOS_ODR_AT_0Hz25,
@@ -99,7 +99,7 @@ TMOS_ODRS = {
     '30HZ': TmosOdr.STHS34PF80_TMOS_ODR_AT_30Hz,
 }
 
-LpfBandwidth = sths34pf80_ns.enum('sths34pf80_lpf_bandwidth_t')
+LpfBandwidth = cg.global_ns.enum('sths34pf80_lpf_bandwidth_t')
 LPF_BANDWIDTHS = {
     'DIV_9': LpfBandwidth.STHS34PF80_LPF_ODR_DIV_9,
     'DIV_20': LpfBandwidth.STHS34PF80_LPF_ODR_DIV_20,
@@ -110,14 +110,14 @@ LPF_BANDWIDTHS = {
     'DIV_800': LpfBandwidth.STHS34PF80_LPF_ODR_DIV_800,
 }
 
-TmosRouteInt = sths34pf80_ns.enum('sths34pf80_tmos_route_int_t')
+TmosRouteInt = cg.global_ns.enum('sths34pf80_tmos_route_int_t')
 TMOS_ROUTE_INTS = {
     'HIZ': TmosRouteInt.STHS34PF80_TMOS_INT_HIZ,
     'DRDY': TmosRouteInt.STHS34PF80_TMOS_INT_DRDY,
     'OR': TmosRouteInt.STHS34PF80_TMOS_INT_OR,
 }
 
-TmosIntOr = sths34pf80_ns.enum('sths34pf80_tmos_int_or_t')
+TmosIntOr = cg.global_ns.enum('sths34pf80_tmos_int_or_t')
 TMOS_INT_ORS = {
     'NONE': TmosIntOr.STHS34PF80_TMOS_INT_NONE,
     'TSHOCK': TmosIntOr.STHS34PF80_TMOS_INT_TSHOCK,
@@ -129,7 +129,7 @@ TMOS_INT_ORS = {
     'ALL': TmosIntOr.STHS34PF80_TMOS_INT_ALL,
 }
 
-DrdyMode = sths34pf80_ns.enum('sths34pf80_drdy_mode_t')
+DrdyMode = cg.global_ns.enum('sths34pf80_drdy_mode_t')
 DRDY_MODES = {
     'PULSED': DrdyMode.STHS34PF80_DRDY_PULSED,
     'LATCHED': DrdyMode.STHS34PF80_DRDY_LATCHED,
@@ -156,7 +156,7 @@ CONFIG_SCHEMA = cv.All(
         # Device configuration - Basic sensor settings
         cv.Optional(CONF_GAIN_MODE): cv.enum(GAIN_MODES, upper=True),
         cv.Optional(CONF_TMOS_SENSITIVITY): cv.All(cv.uint16_t, cv.Range(min=1, max=65535)),
-        cv.Optional(CONF_TMOS_ODR, default="15HZ"): cv.enum(TMOS_ODRS, upper=True),
+        cv.Optional(CONF_TMOS_ODR, default="8HZ"): cv.enum(TMOS_ODRS, upper=True),
 
         # Automatic recalibration
         cv.Optional(CONF_RECALIBRATION_INTERVAL, default="10min"): cv.positive_time_period_milliseconds,

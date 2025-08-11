@@ -94,6 +94,8 @@ class Sths34pf80Component : public Component, public i2c::I2CDevice {
   uint32_t recalibration_interval_ms_ = 0;  // 0 == disabled
   uint32_t last_recalibration_ms_ = 0;
 
+  uint16_t factory_calibrated_sensitivity_ = 2000; // Approx value, actual value is read at start up 
+
   bool calibration_enabled_ = false;
 
   // Binary sensors for detection events
@@ -114,7 +116,7 @@ class Sths34pf80Component : public Component, public i2c::I2CDevice {
     optional<uint16_t> tmos_sensitivity;
 
     // Output data rate - determines measurement frequency and power consumption
-    optional<sths34pf80_tmos_odr_t> tmos_odr;
+    sths34pf80_tmos_odr_t tmos_odr = STHS34PF80_TMOS_ODR_AT_15Hz;
 
     // Presence detection algorithm settings
     optional<uint16_t> presence_threshold_lsb;
@@ -341,7 +343,7 @@ class Sths34pf80Component : public Component, public i2c::I2CDevice {
   }
 
   // Ambient temperature shock detection threshold
-  // Detects sudden ambient temperature changes (e.g., HVAC activation)
+  // Detects sudden ambient temperature changes
   int32_t get_t_ambient_shock_threshold_lsb(uint16_t *val);
   int32_t get_t_ambient_shock_threshold_degree(float *val) {
     uint16_t lsb = 0;
@@ -432,9 +434,9 @@ class Sths34pf80Component : public Component, public i2c::I2CDevice {
  protected:
   // Unit conversion utilities
   // Object temperature: Uses TMOS sensitivity default 2016 LSB/°C
-  float convert_object_lsb_to_degrees(int16_t lsb_sen) { return (float) lsb_sen / 2016.0f; }
+  float convert_object_lsb_to_degrees(int16_t lsb_sen) { return (float) lsb_sen / this->factory_calibrated_sensitivity_; }
 
-  int16_t convert_degrees_to_object_lsb(float degrees) { return (int16_t) (degrees * (float) 2016.0f); }
+  int16_t convert_degrees_to_object_lsb(float degrees) { return (int16_t) (degrees * (float) this->factory_calibrated_sensitivity_); }
 
   // Ambient temperature: Fixed 100 LSB/°C sensitivity (datasheet Section 4.5.2)
   float convert_ambient_lsb_to_degrees(int16_t lsb100) { return (float) lsb100 / 100.0f; }
@@ -451,6 +453,8 @@ class Sths34pf80Component : public Component, public i2c::I2CDevice {
   static int32_t write(void *device, uint8_t addr, const uint8_t *data, uint16_t numData);
 
   static void delay_ms(uint32_t millisec) { delay(millisec); }
+
+
 };
 
 }  // namespace sths34pf80

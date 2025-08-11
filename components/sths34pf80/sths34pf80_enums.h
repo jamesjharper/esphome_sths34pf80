@@ -230,5 +230,47 @@ static const char *get_data_ready_mode_str(sths34pf80_drdy_mode_t mode) {
       return "Unknown";
   }
 }
+
+static inline sths34pf80_tmos_odr_t get_max_odr_for_avg(sths34pf80_avg_tobject_num_t avg) {
+  switch (avg) {
+    case STHS34PF80_AVG_TMOS_2:
+    case STHS34PF80_AVG_TMOS_8:
+    case STHS34PF80_AVG_TMOS_32:
+      return STHS34PF80_TMOS_ODR_AT_30Hz;
+    case STHS34PF80_AVG_TMOS_128:
+      return STHS34PF80_TMOS_ODR_AT_8Hz;
+    case STHS34PF80_AVG_TMOS_256:
+      return STHS34PF80_TMOS_ODR_AT_4Hz;
+    case STHS34PF80_AVG_TMOS_512:
+      return STHS34PF80_TMOS_ODR_AT_2Hz;
+    case STHS34PF80_AVG_TMOS_1024:
+      return STHS34PF80_TMOS_ODR_AT_1Hz;
+    case STHS34PF80_AVG_TMOS_2048:
+      return STHS34PF80_TMOS_ODR_AT_0Hz50;
+    default:
+      return STHS34PF80_TMOS_ODR_AT_30Hz;
+  }
+}
+
+static inline sths34pf80_avg_tobject_num_t get_max_allowed_avg_for_odr(sths34pf80_tmos_odr_t odr) {
+  switch (odr) {
+    case STHS34PF80_TMOS_ODR_AT_30Hz:
+    case STHS34PF80_TMOS_ODR_AT_15Hz:
+      return STHS34PF80_AVG_TMOS_32;
+    case STHS34PF80_TMOS_ODR_AT_8Hz:
+      return STHS34PF80_AVG_TMOS_128;
+    case STHS34PF80_TMOS_ODR_AT_4Hz:
+      return STHS34PF80_AVG_TMOS_256;
+    case STHS34PF80_TMOS_ODR_AT_2Hz:
+      return STHS34PF80_AVG_TMOS_512;
+    case STHS34PF80_TMOS_ODR_AT_1Hz:
+      return STHS34PF80_AVG_TMOS_1024;
+    case STHS34PF80_TMOS_ODR_AT_0Hz50:
+    case STHS34PF80_TMOS_ODR_AT_0Hz25:
+    default:
+      return STHS34PF80_AVG_TMOS_2048;
+  }
+}
+
 }  // namespace sths34pf80
 }  // namespace esphome

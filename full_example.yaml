@@ -9,10 +9,18 @@ esphome:
   platform: ESP32
   board: esp32dev
 
-external_components:
-  - source:
-      type: git
-      url: https://github.com/jamesjharper/esphome_sths34pf80
+wifi:
+  ssid: "your_wifi"
+  password: "your_password"
+
+logger:
+
+api:
+  encryption:
+    key: "your_api_key"
+
+ota:
+  password: "your_ota_password"
 
 i2c:
   id: bus_a
