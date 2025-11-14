@@ -7,7 +7,7 @@ The `sths34pf80` component allows you to use the STMicroelectronics STHS34PF80 t
 - **Human Presence Detection**: Detects stationary people or objects with temperature differences from ambient
 - **Motion Detection**: Detects moving objects with thermal signatures
 - **Ambient Temperature Shock Detection**: Detects sudden changes in ambient temperature (e.g., Equipment failure, fire, etc)
-- **Temperature Monitoring**: Provides ambient and object temperature readings. (Not suitable for reliable real world measurements)
+- **Temperature Monitoring**: Provides ambient and object temperature readings.
 - **Hardware Interrupt Support**: Optional interrupt pin for improved responsiveness and power efficiency
 
 ## Supported Devices
