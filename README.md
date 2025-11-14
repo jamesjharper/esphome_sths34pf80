@@ -41,10 +41,9 @@ sths34pf80:
 - **address** (*Optional*, int): Manually specify the I2C address of the sensor. Can not be reconfigured, must be set to `0x5A`.
 - **interrupt_pin** (*Optional*, [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema)): The pin connected to the sensor's INT pin for hardware interrupts. Improves responsiveness and reduces power consumption.
 
-### Configuration
+### Sensor Settings
 The following settings have sensible defaults which should be adequate for most use cases for detecting human presence. Most users do not need to configure these settings unless you are having issues with reliable detections or have a specialized use case.
 
-#### Sensor Settings
 - **avg_t_object_number** (*Optional*, enum): Number of samples to average for object temperature. More averaging reduces noise but slows response. One of `2`, `8`, `32`, `128`, `256`, `512`, `1024`, `2048`. Defaults to `128`.
   
   **ODR Compatibility:** The maximum `tmos_odr` you can select depends on the chosen averaging factor. Exceeding the limit will cause an error to be logged and the configuration will be rejected.
@@ -66,7 +65,7 @@ The following settings have sensible defaults which should be adequate for most 
   
 - **gain_mode** (*Optional*, enum): Sensor gain mode. `DEFAULT` enables embedded algorithms with 2016 LSB/°C sensitivity. `WIDE` provides 8x measurement range (250 LSB/°C) but disables detection algorithms. Defaults to `DEFAULT`.
 
-#### Detection Configuration
+### Detection Configuration
 Most detection parameters can be specified in either LSB units or temperature degrees (°C). Choose one format per parameter, not both.
 
 **Presence Detection:**
@@ -87,10 +86,10 @@ Most detection parameters can be specified in either LSB units or temperature de
 - **lpf_ambient_temp_bandwidth** (*Optional*, enum): Ambient temperature filter bandwidth. One of `DIV_9`, `DIV_20`, `DIV_50`, `DIV_100`, `DIV_200`, `DIV_400`, `DIV_800`. Defaults to `DIV_50`
 
 
-#### Recalibration
+### Recalibration
 - **recalibration_interval** (*Optional*, [Time](https://esphome.io/guides/configuration-types.html#config-time)): Automatic recalibration interval. Improves presence detection accuracy by recalibrating detection algorithms when no detection occurs. Required if presence_abs_value = `ENABLE_DELAYED`. Set to `0s` to disable. Defaults to `10min`.
 
-#### Interrupt
+### Interrupt
 Generally not recommended to change these settings and these settings are managed internal for data polling.
 - **tmos_route_interrupt** (*Optional*, enum): Interrupt routing configuration. One of `HIZ`, `DRDY`, `OR`. 
 - **tmos_interrupt_or** (*Optional*, enum): Interrupt OR configuration. One of `NONE`, `TSHOCK`, `MOTION`, `TSHOCK_MOTION`, `PRESENCE`, `TSHOCK_PRESENCE`, `MOTION_PRESENCE`, `ALL`. 
