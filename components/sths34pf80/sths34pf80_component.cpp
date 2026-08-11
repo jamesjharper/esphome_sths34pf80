@@ -1090,7 +1090,7 @@ int32_t Sths34pf80Component::write_register_(uint8_t reg, const uint8_t *data, u
 }
 
 int32_t Sths34pf80Component::read_register_(uint8_t reg, uint8_t *data, uint16_t numBytes) {
-  auto error = this->read_register(reg, data, numBytes, /*stop*/ true);
+  auto error = this->read_register(reg, data, numBytes);
   if (error != esphome::i2c::ErrorCode::ERROR_OK) {
     ESP_LOGW(TAG, "Failed to read %u bytes from register 0x%04X", numBytes, reg);
     return -1;
